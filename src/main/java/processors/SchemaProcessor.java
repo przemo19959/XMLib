@@ -82,6 +82,7 @@ public class SchemaProcessor extends AbstractProcessor {
 						GenerateSchema a = annotatedElement.getAnnotation(GenerateSchema.class);
 						xmlService.addRoot(
 							XMLRoot.builder()//
+								.messager(messager)//
 								.document(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument())//
 								.generateSchema(a)//
 								.resourceFolderPath(a.path())//
@@ -89,11 +90,11 @@ public class SchemaProcessor extends AbstractProcessor {
 								.annotatedElement(annotatedElement)//
 								.build());
 					} else if(annotatedElement.getAnnotation(SchemaElement.class) != null) {
-						// messager.printMessage(Kind.ERROR, "SchemaElement: " + annotatedElement.asType().toString());
+
 						boolean isCollectionSubType = types.isSubtype(
 							annotatedElement.asType(), //
 							elements.getTypeElement(Collection.class.getCanonicalName()).asType());
-
+//						messager.printMessage(Kind.ERROR, "SchemaElement: " + annotatedElement.asType().toString() + ", isCollection: " + isCollectionSubType);
 						xmlService.addSchemaElement(
 							XMLElement.builder()//
 								.schemaElement(annotatedElement.getAnnotation(SchemaElement.class))//
@@ -103,9 +104,9 @@ public class SchemaProcessor extends AbstractProcessor {
 					} else if(annotatedElement.getAnnotation(SchemaAttribute.class) != null) {
 
 						// messager.printMessage(Kind.ERROR, "SchemaAttribute: " + annotatedElement.asType());
-//						messager.printMessage(Kind.ERROR, "SchemaAttribute: " + types.asElement(annotatedElement.asType()).getKind());
+						// messager.printMessage(Kind.ERROR, "SchemaAttribute: " + types.asElement(annotatedElement.asType()));
 						List<Element> enumConstants = null;
-						if(ElementKind.ENUM.equals(types.asElement(annotatedElement.asType()).getKind())) {
+						if(types.asElement(annotatedElement.asType()) != null && ElementKind.ENUM.equals(types.asElement(annotatedElement.asType()).getKind())) {
 							enumConstants = types.asElement(annotatedElement.asType()).getEnclosedElements().stream()//
 								.filter(e -> e.getKind().equals(ElementKind.ENUM_CONSTANT))//
 								.collect(Collectors.toList());

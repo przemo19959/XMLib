@@ -59,7 +59,7 @@ public class XMLElement {
 
 	private void addSequenceTemplate(Element element) {
 		complexType = document.createElement("xs:complexType");
-		if(isSequenceNeeded) {
+		if(isCollectionSubType || isSequenceNeeded) { //było isSequenceNeeded
 			sequence = document.createElement("xs:sequence");
 			complexType.appendChild(sequence);
 		}

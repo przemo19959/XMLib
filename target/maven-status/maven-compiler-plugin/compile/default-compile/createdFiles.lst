@@ -1,4 +1,0 @@
-services\XMLService.class
-annotations\GenerateSchema.class
-processors\SchemaProcessor.class
-META-INF\services\javax.annotation.processing.Processor
