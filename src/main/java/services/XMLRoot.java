@@ -50,7 +50,7 @@ public class XMLRoot {
 		body.appendChild(rootElement.getElement());
 
 		// process schema elements
-		messager.printMessage(Kind.ERROR, "rozmiar: " + schemaElements.size());
+		messager.printMessage(Kind.NOTE, "schema elements size for "+generateSchema.rootElement().name()+"= " + schemaElements.size());
 		for(XMLElement e:schemaElements) {
 			e.setDocument(document);
 			e.createXMLElement();
@@ -100,7 +100,7 @@ public class XMLRoot {
 			// schemaElement.setDocument(document); // ważne
 			if(annotatedElement != null && document != null) {
 				// schemaElement.createXMLElement();
-				messager.printMessage(Kind.ERROR, "11" + schemaElement.getElement());
+				messager.printMessage(Kind.NOTE, "11" + schemaElement.getElement());
 				rootElement.getSequence().appendChild(schemaElement.getElement());
 			}
 		}
@@ -129,7 +129,7 @@ public class XMLRoot {
 	}
 
 	private XMLElement getRootElement(List<XMLElement> elements, XMLElement enclosingElement) {
-		messager.printMessage(Kind.ERROR, enclosingElement.getAnnotatedElement().asType()+", "+enclosingElement.getAnnotatedElement().getEnclosingElement().asType());
+		messager.printMessage(Kind.NOTE, enclosingElement.getAnnotatedElement().asType()+", "+enclosingElement.getAnnotatedElement().getEnclosingElement().asType());
 		XMLElement ele = elements.stream()//
 			.filter(e -> {
 				String parameterType = e.getAnnotatedElement().asType().toString(); // typ pola oznaczonego @SchemaElement
@@ -138,7 +138,7 @@ public class XMLRoot {
 				return parameterType.equals(enclosingElement.getAnnotatedElement().getEnclosingElement().asType().toString()); 
 			}).findFirst().orElse(null); // wybierz ten, których typy się zgadzają
 		if(ele!=null)
-			messager.printMessage(Kind.ERROR, "result: "+ele.getAnnotatedElement());
+			messager.printMessage(Kind.NOTE, "result: "+ele.getAnnotatedElement());
 //		messager.printMessage(Kind.ERROR, "root: "+ele.getAnnotatedElement().asType()+" for: "+enclosingElement.getAnnotatedElement().asType());
 		return ele;
 	}

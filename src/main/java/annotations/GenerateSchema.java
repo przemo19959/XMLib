@@ -8,6 +8,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
 public @interface GenerateSchema {
-	public String path();
-	public SchemaElement rootElement() default @SchemaElement(name="");
+	public String path() default "";
+	public SchemaElement rootElement() default @SchemaElement(name="root");
 }
