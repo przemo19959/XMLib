@@ -9,7 +9,7 @@ import javax.lang.model.element.ElementKind;
 
 import annotations.SchemaAttribute;
 import processors.ServiceDTO;
-import services.XMLAttribute;
+import services.elements.XMLAttribute;
 import strategies.process.ProcessStrategy;
 
 public class SchemaAttributeStrategy extends ProcessStrategy {
@@ -20,15 +20,19 @@ public class SchemaAttributeStrategy extends ProcessStrategy {
 	@Override
 	public void processAnnotation() {
 		List<Element> enumConstants = null;
-		if(getServiceDTO().getTypes().asElement(getAnnotatedElement().asType()) != null && ElementKind.ENUM.equals(getServiceDTO().getTypes().asElement(getAnnotatedElement().asType()).getKind())) {
-			enumConstants = getServiceDTO().getTypes().asElement(getAnnotatedElement().asType()).getEnclosedElements().stream()//
-				.filter(e -> e.getKind().equals(ElementKind.ENUM_CONSTANT))//
+		log("b");
+		if(equalsKind(getAnnotatedElement(), ElementKind.ENUM)) {
+			log("a");
+			enumConstants = getEnclosedElements(getAnnotatedElement()).stream()//
+				.filter(e -> equalsKind(e, ElementKind.ENUM_CONSTANT))//
 				.collect(Collectors.toList());
 		}
-		getServiceDTO().getXmlService().addSchemaAttribute(XMLAttribute.builder()//
-			.schemaAttribute((SchemaAttribute) getAnnotation())//
-			.enumConstants(enumConstants)//
-			.annotatedElement(getAnnotatedElement())//
-			.build());
+
+		getServiceDTO().getXmlService()//
+			.addSchemaAttribute(XMLAttribute.builder()//
+				.schemaAttribute((SchemaAttribute) getAnnotation())//
+				.enumConstants(enumConstants)//
+				.annotatedElement(getAnnotatedElement())//
+				.build());
 	}
 }

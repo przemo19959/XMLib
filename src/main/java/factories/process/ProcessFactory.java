@@ -19,7 +19,7 @@ public class ProcessFactory {
 	private final ServiceDTO serviceDTO;
 
 	public ProcessStrategy getInstance(Element annotatedElement) {
-		Annotation a = null;
+		Annotation a=null;
 		if((a = annotatedElement.getAnnotation(GenerateSchema.class)) != null)
 			return new GenerateSchemaStrategy(serviceDTO, a, annotatedElement);
 		else if((a = annotatedElement.getAnnotation(SchemaElement.class)) != null)

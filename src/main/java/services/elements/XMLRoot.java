@@ -1,41 +1,42 @@
-package services;
+package services.elements;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.ls.DOMImplementationLS;
-import org.w3c.dom.ls.LSSerializer;
 
 import annotations.GenerateSchema;
-import lombok.Builder;
 import lombok.Getter;
 
-@Builder
 @Getter
-public class XMLRoot {
-	
+public class XMLRoot {	
 	//TODO - 30 sty 2020:ogólnie działa, ale do poprawki. Najlepiej wykorzystać jakiś algorytm tworzenia drzewa, bo straszne zamieszanie jest
-//	private final Messager messager;
 
 	private final Document document;
 	private final javax.lang.model.element.Element annotatedElement;
 	private final GenerateSchema generateSchema;
-
-	// pola nie ustawiane przez buildera
-	private final String resourceFolderPath;
-	private final String fileName;
+	
+	private String fileName;
+	
+	public XMLRoot(Document document, javax.lang.model.element.Element annotatedElement, GenerateSchema generateSchema) {
+		this.document = document;
+		this.annotatedElement = annotatedElement;
+		this.generateSchema = generateSchema;
+		fileName=annotatedElement.getSimpleName().toString();
+	}
 
 	public void createXML(List<XMLElement> schemaElements, List<XMLAttribute> schemaAttributes) throws XMLException {
+		//create xs:schema element with namespace
 		Element body = document.createElement("xs:schema");
 		body.setAttribute("xmlns:xs", "http://www.w3.org/2001/XMLSchema");
 		document.appendChild(body);
 
-		DOMImplementationLS domImplLS = (DOMImplementationLS) document.getImplementation();
-		LSSerializer serializer = domImplLS.createLSSerializer();
+//		DOMImplementationLS domImplLS = (DOMImplementationLS) document.getImplementation();
+//		LSSerializer serializer = domImplLS.createLSSerializer();
 		// String str = serializer.writeToString(node);
-
+		
+		//create root xs:element
 		XMLElement rootElement = XMLElement.builder()//
 			.document(document)//
 			.schemaElement(generateSchema.rootElement())//

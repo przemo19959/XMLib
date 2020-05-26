@@ -8,7 +8,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import annotations.GenerateSchema;
 import lombok.SneakyThrows;
 import processors.ServiceDTO;
-import services.XMLRoot;
+import services.elements.XMLRoot;
 import strategies.process.ProcessStrategy;
 
 public class GenerateSchemaStrategy extends ProcessStrategy {
@@ -19,14 +19,9 @@ public class GenerateSchemaStrategy extends ProcessStrategy {
 	@Override
 	@SneakyThrows
 	public void processAnnotation() {
-		GenerateSchema a=(GenerateSchema) getAnnotation();
-		
-		getServiceDTO().getXmlService().addRoot(XMLRoot.builder()//
-			.document(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument())//
-			.generateSchema(a)//
-			.resourceFolderPath(a.path())//
-			.fileName(getAnnotatedElement().getSimpleName().toString())//
-			.annotatedElement(getAnnotatedElement())//
-			.build());
+		getServiceDTO().getXmlService()//
+			.addRoot(new XMLRoot(	DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument(), //
+									getAnnotatedElement(), //
+									(GenerateSchema) getAnnotation()));
 	}
 }

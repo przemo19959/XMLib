@@ -5,13 +5,13 @@
 	<groupId>pl.dabrowski</groupId>
 	<artifactId>XMLib</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<maven.compiler.source>1.8</maven.compiler.source>
 	</properties>
-	
+
 	<dependencies>
 		<dependency>
 			<groupId>com.google.auto.service</groupId>
@@ -19,13 +19,20 @@
 			<version>1.0-rc6</version>
 			<scope>provided</scope>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<version>1.18.10</version>
 			<scope>provided</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>com.google.testing.compile</groupId>
+			<artifactId>compile-testing</artifactId>
+			<version>0.18</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
-	
+
 </project>
