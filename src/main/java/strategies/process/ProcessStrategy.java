@@ -6,16 +6,14 @@ import javax.lang.model.element.Element;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import services.XMLService;
+import processors.ServiceDTO;
 
 @Getter
 @RequiredArgsConstructor
-public abstract class ProcessStrategy<T extends Annotation> {
-	private final XMLService xmlService;
-	private final Class<T> annotationCls;
-	private T annotation;
+public abstract class ProcessStrategy{
+	private final ServiceDTO serviceDTO;
+	private final Annotation annotation;
+	private final Element annotatedElement;
 	
-	public void processAnnotation(Element annotatedElement) {
-		annotation = annotatedElement.getAnnotation(annotationCls);
-	};
+	public abstract void processAnnotation();
 }

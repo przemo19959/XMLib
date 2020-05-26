@@ -3,9 +3,6 @@ package services;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.annotation.processing.Messager;
-import javax.tools.Diagnostic.Kind;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.ls.DOMImplementationLS;
@@ -20,7 +17,7 @@ import lombok.Getter;
 public class XMLRoot {
 	
 	//TODO - 30 sty 2020:ogólnie działa, ale do poprawki. Najlepiej wykorzystać jakiś algorytm tworzenia drzewa, bo straszne zamieszanie jest
-	private final Messager messager;
+//	private final Messager messager;
 
 	private final Document document;
 	private final javax.lang.model.element.Element annotatedElement;
@@ -50,7 +47,7 @@ public class XMLRoot {
 		body.appendChild(rootElement.getElement());
 
 		// process schema elements
-		messager.printMessage(Kind.NOTE, "schema elements size for "+generateSchema.rootElement().name()+"= " + schemaElements.size());
+//		messager.printMessage(Kind.NOTE, "schema elements size for "+generateSchema.rootElement().name()+"= " + schemaElements.size());
 		for(XMLElement e:schemaElements) {
 			e.setDocument(document);
 			e.createXMLElement();
@@ -100,7 +97,7 @@ public class XMLRoot {
 			// schemaElement.setDocument(document); // ważne
 			if(annotatedElement != null && document != null) {
 				// schemaElement.createXMLElement();
-				messager.printMessage(Kind.NOTE, "11" + schemaElement.getElement());
+//				messager.printMessage(Kind.NOTE, "11" + schemaElement.getElement());
 				rootElement.getSequence().appendChild(schemaElement.getElement());
 			}
 		}
@@ -129,7 +126,7 @@ public class XMLRoot {
 	}
 
 	private XMLElement getRootElement(List<XMLElement> elements, XMLElement enclosingElement) {
-		messager.printMessage(Kind.NOTE, enclosingElement.getAnnotatedElement().asType()+", "+enclosingElement.getAnnotatedElement().getEnclosingElement().asType());
+//		messager.printMessage(Kind.NOTE, enclosingElement.getAnnotatedElement().asType()+", "+enclosingElement.getAnnotatedElement().getEnclosingElement().asType());
 		XMLElement ele = elements.stream()//
 			.filter(e -> {
 				String parameterType = e.getAnnotatedElement().asType().toString(); // typ pola oznaczonego @SchemaElement
@@ -137,8 +134,8 @@ public class XMLRoot {
 					parameterType = parameterType.substring(parameterType.indexOf('<') + 1, parameterType.lastIndexOf('>'));
 				return parameterType.equals(enclosingElement.getAnnotatedElement().getEnclosingElement().asType().toString()); 
 			}).findFirst().orElse(null); // wybierz ten, których typy się zgadzają
-		if(ele!=null)
-			messager.printMessage(Kind.NOTE, "result: "+ele.getAnnotatedElement());
+//		if(ele!=null)
+//			messager.printMessage(Kind.NOTE, "result: "+ele.getAnnotatedElement());
 //		messager.printMessage(Kind.ERROR, "root: "+ele.getAnnotatedElement().asType()+" for: "+enclosingElement.getAnnotatedElement().asType());
 		return ele;
 	}

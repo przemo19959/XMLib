@@ -4,15 +4,12 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.net.URI;
 import java.nio.file.Paths;
-import java.util.Collection;
 import java.util.Enumeration;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.stream.Collectors;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
@@ -24,25 +21,17 @@ import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic.Kind;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.tools.StandardLocation;
 
 import com.google.auto.service.AutoService;
 
-import annotations.GenerateSchema;
-import annotations.SchemaAttribute;
-import annotations.SchemaElement;
+import factories.process.ProcessFactory;
 import lombok.SneakyThrows;
-import services.XMLAttribute;
-import services.XMLElement;
 import services.XMLException;
-import services.XMLRoot;
 import services.XMLService;
 import strategies.process.ProcessStrategy;
 
@@ -50,7 +39,7 @@ import strategies.process.ProcessStrategy;
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class SchemaProcessor extends AbstractProcessor {
 	private static final String PROCESSOR_ANNOTATIONS_PACKAGE_PATH = "annotations";
-	
+
 	// Processor API
 	private Messager messager;
 	private Types types;
@@ -59,8 +48,10 @@ public class SchemaProcessor extends AbstractProcessor {
 	// own API
 	private XMLService xmlService;
 	private String projectPath;
-	
-	private ProcessStrategy<Annotation> strategy;
+
+	private ProcessStrategy strategy;
+	private ProcessFactory factory;
+	private ServiceDTO serviceDTO;
 
 	@Override
 	public synchronized void init(ProcessingEnvironment processingEnv) {
@@ -83,57 +74,22 @@ public class SchemaProcessor extends AbstractProcessor {
 	@Override
 	public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
 		xmlService = new XMLService(projectPath);
+		serviceDTO = new ServiceDTO(types, elements, xmlService);
+		factory = new ProcessFactory(serviceDTO);
+		
 		try {
 			for(TypeElement annotation:annotations) {
 				for(Element annotatedElement:roundEnv.getElementsAnnotatedWith(annotation)) {
-					messager.printMessage(Kind.NOTE, annotatedElement.getSimpleName() + " => " + annotation.getSimpleName());
-					// messager.printMessage(Kind.ERROR, ":: " + annotatedElement.getSimpleName());
-					//TODO - 25 maj 2020:tutaj jeszcze dać fabrykę, która zwróci odpowiednią implementację na podstawie
-					//czyli strategy=Factory.getInstance(annotation);
-					strategy.processAnnotation(annotatedElement);
-					
-					
-					if(annotatedElement.getAnnotation(GenerateSchema.class) != null) {
-						// messager.printMessage(Kind.ERROR, "GenerateSchema: " + annotatedElement.getSimpleName());
-						GenerateSchema a = annotatedElement.getAnnotation(GenerateSchema.class);
-						xmlService.addRoot(XMLRoot.builder()//
-							.messager(messager)//
-							.document(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument())//
-							.generateSchema(a)//
-							.resourceFolderPath(a.path())//
-							.fileName(annotatedElement.getSimpleName().toString())//
-							.annotatedElement(annotatedElement)//
-							.build());
-					} else if(annotatedElement.getAnnotation(SchemaElement.class) != null) {
-						boolean isCollectionSubType = types.isSubtype(annotatedElement.asType(), //
-							elements.getTypeElement(Collection.class.getCanonicalName()).asType());
-						xmlService.addSchemaElement(XMLElement.builder()//
-							.schemaElement(annotatedElement.getAnnotation(SchemaElement.class))//
-							.isCollectionSubType(isCollectionSubType)//
-							.annotatedElement(annotatedElement)//
-							.build());
-					} else if(annotatedElement.getAnnotation(SchemaAttribute.class) != null) {
-						List<Element> enumConstants = null;
-						if(types.asElement(annotatedElement.asType()) != null && ElementKind.ENUM.equals(types.asElement(annotatedElement.asType()).getKind())) {
-							enumConstants = types.asElement(annotatedElement.asType()).getEnclosedElements().stream()//
-								.filter(e -> e.getKind().equals(ElementKind.ENUM_CONSTANT))//
-								.collect(Collectors.toList());
-						}
-						xmlService.addSchemaAttribute(XMLAttribute.builder()//
-							.schemaAttribute(annotatedElement.getAnnotation(SchemaAttribute.class))//
-							.enumConstants(enumConstants)//
-							.annotatedElement(annotatedElement)//
-							.build());
-					}
+					log(annotatedElement.getSimpleName() + " => " + annotation.getSimpleName());
+					strategy = factory.getInstance(annotatedElement);
+					strategy.processAnnotation();
 				}
 			}
-			messager.printMessage(Kind.NOTE, "schema roots size: " + xmlService.getSchemaRoots().size());
+			log("schema roots size: " + xmlService.getSchemaRoots().size());
 			xmlService.createSchemaFile();
 		} catch (XMLException xe) {
 			messager.printMessage(Kind.ERROR, xe.getMessage(), xe.getAnnotatedElement(), getAnnotationMirror(xe.getAnnotatedElement(), xe.getAnnotationClass()));
-		} catch (ParserConfigurationException e) {
-			e.printStackTrace();
-		}
+		} 
 		return true;
 	}
 
@@ -157,7 +113,7 @@ public class SchemaProcessor extends AbstractProcessor {
 		//		annotations.forEach(i->log(i));
 		return annotations;
 	}
-	
+
 	//========================================
 	private void doForEveryObjectInPackage(String packageName, Consumer<JarEntry> body) {
 		String packagePath = getFullPathToPackage(packageName);
@@ -188,7 +144,7 @@ public class SchemaProcessor extends AbstractProcessor {
 			.substring(0, input.lastIndexOf(".jar!") + 4)//remove path after .jar!
 			.substring("jar:file:/".length());//remove initial protocol
 	}
-	
+
 	private static boolean isStringJavaLanguageObject(String input) {
 		return input.endsWith(".class");
 	}
