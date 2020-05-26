@@ -1,6 +1,7 @@
 package strategies.process.impl;
 
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,20 +20,21 @@ public class SchemaAttributeStrategy extends ProcessStrategy {
 
 	@Override
 	public void processAnnotation() {
-		List<Element> enumConstants = null;
-		log("b");
-		if(equalsKind(getAnnotatedElement(), ElementKind.ENUM)) {
-			log("a");
-			enumConstants = getEnclosedElements(getAnnotatedElement()).stream()//
-				.filter(e -> equalsKind(e, ElementKind.ENUM_CONSTANT))//
-				.collect(Collectors.toList());
-		}
-
 		getServiceDTO().getXmlService()//
 			.addSchemaAttribute(XMLAttribute.builder()//
 				.schemaAttribute((SchemaAttribute) getAnnotation())//
-				.enumConstants(enumConstants)//
+				.enumConstants(getEnumConstantsIfElementIsEnum())//
 				.annotatedElement(getAnnotatedElement())//
 				.build());
+	}
+
+	private List<Element> getEnumConstantsIfElementIsEnum() {
+		List<Element> enumConstants = new ArrayList<>();
+		if(equalsTypeKind(getAnnotatedElement(), ElementKind.ENUM)) {
+			enumConstants.addAll(getEnclosedElements(getAnnotatedElement()).stream()//
+				.filter(e -> equalsKind(e, ElementKind.ENUM_CONSTANT))//
+				.collect(Collectors.toList()));
+		}
+		return enumConstants;
 	}
 }

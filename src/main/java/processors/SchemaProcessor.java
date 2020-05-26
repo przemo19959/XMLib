@@ -75,12 +75,10 @@ public class SchemaProcessor extends AbstractProcessor {
 		try {
 			for(TypeElement annotation:annotations) {
 				for(Element annotatedElement:roundEnv.getElementsAnnotatedWith(annotation)) {
-//					log(annotatedElement.getSimpleName() + " => " + annotation.getSimpleName());
 					strategy = factory.getInstance(annotatedElement);
 					strategy.processAnnotation();
 				}
 			}
-//			log("schema roots size: " + xmlService.getSchemaRoots().size());
 			xmlService.createSchemaFile(projectPath);
 		} catch (XMLException xe) {
 			messager.printMessage(Kind.ERROR, xe.getMessage(), xe.getAnnotatedElement(), getAnnotationMirror(xe.getAnnotatedElement(), xe.getAnnotationClass()));
@@ -96,6 +94,7 @@ public class SchemaProcessor extends AbstractProcessor {
 		return null;
 	}
 
+	@SuppressWarnings("unused")
 	private void log(String msg) {
 		messager.printMessage(Kind.NOTE, msg);
 	}

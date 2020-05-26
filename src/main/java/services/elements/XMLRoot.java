@@ -16,7 +16,6 @@ public class XMLRoot {
 	private final Document document;
 	private final javax.lang.model.element.Element annotatedElement;
 	private final GenerateSchema generateSchema;
-	
 	private String fileName;
 	
 	public XMLRoot(Document document, javax.lang.model.element.Element annotatedElement, GenerateSchema generateSchema) {
@@ -31,10 +30,6 @@ public class XMLRoot {
 		Element body = document.createElement("xs:schema");
 		body.setAttribute("xmlns:xs", "http://www.w3.org/2001/XMLSchema");
 		document.appendChild(body);
-
-//		DOMImplementationLS domImplLS = (DOMImplementationLS) document.getImplementation();
-//		LSSerializer serializer = domImplLS.createLSSerializer();
-		// String str = serializer.writeToString(node);
 		
 		//create root xs:element
 		XMLElement rootElement = XMLElement.builder()//
@@ -48,11 +43,9 @@ public class XMLRoot {
 		body.appendChild(rootElement.getElement());
 
 		// process schema elements
-//		messager.printMessage(Kind.NOTE, "schema elements size for "+generateSchema.rootElement().name()+"= " + schemaElements.size());
 		for(XMLElement e:schemaElements) {
 			e.setDocument(document);
 			e.createXMLElement();
-			// messager.printMessage(Kind.ERROR, "element: "+serializer.writeToString(e.getElement()));
 		}
 
 		for(XMLElement schemaElement:schemaElements) {

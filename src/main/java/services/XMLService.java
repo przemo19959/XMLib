@@ -38,14 +38,11 @@ public class XMLService {
 	}
 
 	public void addRoot(XMLRoot xmlRoot) {
-		//ewentualne ostrzeżenie dodać o tym, że istniej już taka adnoacja GenerateSchema z taką ścieżką
 		if(schemaRoots.stream()//
 			.filter(sr -> sr.getAnnotatedElement().getSimpleName().equals(xmlRoot.getAnnotatedElement().getSimpleName()))//
 			.count() == 0) {
 			schemaRoots.add(xmlRoot);
 		}
-		//			return; //potrzebne aby nie dublowały się obiekty
-
 	}
 
 	//@formatter:off

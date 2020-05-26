@@ -26,9 +26,24 @@ public abstract class ProcessStrategy {
 			.directSupertypes(element.asType()).toString()//
 			.contains(Collection.class.getCanonicalName());
 	}
-
+	
+	/**
+	 * This method compares kind of element in context of surounding class. For example "private String name;"
+	 * is of ElementKind.FIELD kind. Contructor is ElementKind.CONSTRUCTOR, and so on. 
+	 */
 	public boolean equalsKind(Element element, ElementKind kind) {
 		return element.getKind().equals(kind);
+	}
+	
+	/**
+	 * This method compares kind of element type. For example for field "private WorkerType type;" it will
+	 * compare element type. WorkerType is enum, and so method yields true only for ElementKind.ENUM. 
+	 */
+	public boolean equalsTypeKind(Element element, ElementKind kind) {
+		Element e=null;
+		if((e=getServiceDTO().getTypes().asElement(element.asType()))!=null)
+			return equalsKind(e, kind);
+		return false;
 	}
 
 	public List<? extends Element> getEnclosedElements(Element element) {
