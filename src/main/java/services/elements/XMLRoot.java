@@ -25,7 +25,7 @@ public class XMLRoot {
 		fileName=annotatedElement.getSimpleName().toString();
 	}
 
-	public void createXML(List<XMLElement> schemaElements, List<XMLAttribute> schemaAttributes) throws XMLException {
+	public void createXML(List<XMLElement> schemaElements, List<XMLAttribute> schemaAttributes) throws XMLException{
 		//create xs:schema element with namespace
 		Element body = document.createElement("xs:schema");
 		body.setAttribute("xmlns:xs", "http://www.w3.org/2001/XMLSchema");

@@ -27,7 +27,7 @@ public class XMLElement {
 	private Element sequence;
 	private Element complexType;
 
-	public void createXMLElement() throws XMLException {
+	public void createXMLElement(){
 		element = document.createElement("xs:element");
 		Map<String, String> attributes = getAttributesMapForElement();
 		attributes.keySet().stream()//
@@ -46,11 +46,9 @@ public class XMLElement {
 		}
 	}
 
-	private Map<String, String> getAttributesMapForElement() throws XMLException {
+	private Map<String, String> getAttributesMapForElement(){
 		Map<String, String> map = new HashMap<>();
-		if(schemaElement.name().length()==0)
-			throw new XMLException("Schema element name attribute can't be empty!", annotatedElement, SchemaElement.class);
-		map.put("name", schemaElement.name());
+		map.put("name", schemaElement.name().length()>0?schemaElement.name():annotatedElement.getSimpleName().toString());
 		if(annotatedElement.getKind().isField()) {
 			map.put("minOccurs", schemaElement.required() ? "1" : "0");
 			map.put("maxOccurs", isCollectionSubType ? "unbounded" : "1");
