@@ -61,6 +61,7 @@ public class SchemaProcessor extends AbstractProcessor {
 		elements = processingEnv.getElementUtils();
 
 		setProjectPath(filer);
+		log("Processor XMLib started...");
 	}
 
 	@SneakyThrows
@@ -97,7 +98,6 @@ public class SchemaProcessor extends AbstractProcessor {
 		return null;
 	}
 
-	@SuppressWarnings("unused")
 	private void log(String msg) {
 		messager.printMessage(Kind.NOTE, msg);
 	}
