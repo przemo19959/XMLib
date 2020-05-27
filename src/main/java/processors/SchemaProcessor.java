@@ -3,6 +3,7 @@ package processors;
 import java.lang.annotation.Annotation;
 import java.net.URI;
 import java.nio.file.Paths;
+import java.text.MessageFormat;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -33,6 +34,9 @@ import strategies.process.ProcessStrategy;
 @AutoService(Processor.class)
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class SchemaProcessor extends AbstractProcessor {
+	private static final String STRATEGY_CANON_PATTERN = "{0}.{1}Strategy";
+	//paths can't start or end with . sign
+	private static final String PROCESSOR_STRATEGIES_IMPL_PATH = "strategies.process.impl";
 	private static final String PROCESSOR_ANNOTATIONS_PACKAGE_PATH = "annotations";
 
 	// Processor API
@@ -69,9 +73,8 @@ public class SchemaProcessor extends AbstractProcessor {
 	@Override
 	public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
 		xmlService = new XMLService();
-		serviceDTO = new ServiceDTO(messager,types, elements, xmlService);
+		serviceDTO = new ServiceDTO(messager, types, elements, xmlService);
 		factory = new ProcessFactory(serviceDTO);
-
 		try {
 			for(TypeElement annotation:annotations) {
 				for(Element annotatedElement:roundEnv.getElementsAnnotatedWith(annotation)) {
@@ -102,8 +105,19 @@ public class SchemaProcessor extends AbstractProcessor {
 	@Override
 	public Set<String> getSupportedAnnotationTypes() {
 		Set<String> annotations = new LinkedHashSet<String>();
-		PackageTool.doForEveryObjectInPackage(PROCESSOR_ANNOTATIONS_PACKAGE_PATH, //
-			je -> annotations.add(je.getName().replace("/", ".").replace(".class", "")));
+		PackageTool.doForEveryObjectInPackage(PROCESSOR_ANNOTATIONS_PACKAGE_PATH, je -> {
+			String annotationCanonicalName = je.getName().replace("/", ".").replace(".class", "");
+			annotations.add(annotationCanonicalName);
+			try {
+				Class<? extends ProcessStrategy> strategy = Class.forName(MessageFormat.format(STRATEGY_CANON_PATTERN, //
+					PROCESSOR_STRATEGIES_IMPL_PATH, annotationCanonicalName.substring(annotationCanonicalName.lastIndexOf(".") + 1)))//
+					.asSubclass(ProcessStrategy.class);
+				Class<? extends Annotation> annotationCls = Class.forName(annotationCanonicalName).asSubclass(Annotation.class);
+				ProcessFactory.register(annotationCls, strategy);
+			} catch (ClassNotFoundException e) {
+				//do nothing
+			}
+		});
 		//		annotations.forEach(i->log(i));
 		return annotations;
 	}

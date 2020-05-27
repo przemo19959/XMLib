@@ -18,9 +18,9 @@ public abstract class ProcessStrategy {
 	private final ServiceDTO serviceDTO;
 	private final Annotation annotation;
 	private final Element annotatedElement;
-
+	
 	public abstract void processAnnotation();
-
+	
 	public boolean isCollectionType(Element element) {
 		return getServiceDTO().getTypes()//
 			.directSupertypes(element.asType()).toString()//
