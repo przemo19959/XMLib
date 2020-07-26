@@ -13,26 +13,27 @@ import pl.dabrowski.XMLib.utils.ServiceDTO;
 
 @RequiredArgsConstructor
 public class ProcessFactory {
+	private static final String NO_STRATEGY_ERROR = "Annotation doesn't have strategy!";
 	private final ServiceDTO serviceDTO;
 
-	private static final Map<Class<? extends Annotation>, Class<? extends ProcessStrategy>> map;
+	private static final Map<Class<? extends Annotation>, Class<? extends ProcessStrategy>> MAP;
 	static {
-		map = new HashMap<>();
+		MAP = new HashMap<>();
 	}
-
-	public static void register(Class<? extends Annotation> key, Class<? extends ProcessStrategy> value) {
-		map.put(key, value);
-	}
+	
+	//@formatter:off
+	public static void register(Class<? extends Annotation> key, Class<? extends ProcessStrategy> value) {MAP.put(key, value);}
+	//@formatter:on
 
 	@SneakyThrows
 	public ProcessStrategy getInstance(Element annotatedElement) {
 		Annotation a = null;
-		for(Class<? extends Annotation> annotation:map.keySet()) {
+		for(Class<? extends Annotation> annotation:MAP.keySet()) {
 			if((a = annotatedElement.getAnnotation(annotation)) != null)
-				return map.get(annotation)//
+				return MAP.get(annotation)//
 					.getDeclaredConstructor(ServiceDTO.class, Annotation.class, Element.class)//
 					.newInstance(serviceDTO, a, annotatedElement);
 		}
-		throw new IllegalArgumentException("Annotation doesn't have strategy!");
+		throw new IllegalArgumentException(NO_STRATEGY_ERROR);
 	}
 }
