@@ -1,7 +1,8 @@
-package services;
+package pl.dabrowski.XMLib.services;
 
 import java.io.File;
 import java.nio.file.Files;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.transform.OutputKeys;
@@ -16,27 +17,32 @@ import org.w3c.dom.Document;
 
 import lombok.Getter;
 import lombok.SneakyThrows;
+import pl.dabrowski.XMLib.services.elements.XMLAttribute;
+import pl.dabrowski.XMLib.services.elements.XMLElement;
+import pl.dabrowski.XMLib.services.elements.XMLException;
+import pl.dabrowski.XMLib.services.elements.XMLRoot;
 
 @Getter
 public class XMLService {
-	private String projectDirPath;
-
+	private static final String PATH_PATTERN = "{0}/{1}";
+	private static final String SCHEMA_PATTERN = "{0}/{1}.xsd";
+	
 	private List<XMLRoot> schemaRoots;
 	private List<XMLElement> schemaElements;
 	private List<XMLAttribute> schemaAttributes;
 
-	public XMLService(String projectDirPath) {
-		this.projectDirPath = projectDirPath;
+	public XMLService() {
 		schemaRoots = new ArrayList<>();
 		schemaElements = new ArrayList<>();
 		schemaAttributes = new ArrayList<>();
 	}
 
 	public void addRoot(XMLRoot xmlRoot) {
-		//ewentualne ostrzeżenie dodać o tym, że istniej już taka adnoacja GenerateSchema z taką ścieżką
-		if(schemaRoots.stream().filter(sRoot->sRoot.getAnnotatedElement().getSimpleName().equals(xmlRoot.getAnnotatedElement().getSimpleName())).count()>0)
-			return; //potrzebne aby nie dublowały się obiekty
-		schemaRoots.add(xmlRoot);
+		if(schemaRoots.stream()//
+			.filter(sr -> sr.getAnnotatedElement().getSimpleName().equals(xmlRoot.getAnnotatedElement().getSimpleName()))//
+			.count() == 0) {
+			schemaRoots.add(xmlRoot);
+		}
 	}
 
 	//@formatter:off
@@ -44,12 +50,15 @@ public class XMLService {
 	public void addSchemaAttribute(XMLAttribute xmlAttribute) {schemaAttributes.add(xmlAttribute);}
 	//@formatter:on
 
-	public void createSchemaFile() throws XMLException {
+	public void createSchemaFile(String projectDirPath) throws XMLException {
 		for(XMLRoot xmlRoot:schemaRoots) {
 			// appendAllElements();
 			xmlRoot.createXML(schemaElements, schemaAttributes);
-			String schemaFilePath = projectDirPath + "/" + xmlRoot.getResourceFolderPath() + "/" + xmlRoot.getFileName() + ".xsd";
-			createDirectoryIfNotExists(projectDirPath + "/" + xmlRoot.getResourceFolderPath());
+			
+			String tmp=MessageFormat.format(PATH_PATTERN, projectDirPath, xmlRoot.getGenerateSchema().path());
+			createDirectoryIfNotExists(tmp);
+			
+			String schemaFilePath = MessageFormat.format(SCHEMA_PATTERN, tmp, xmlRoot.getFileName());
 			createFileIfNotExists(schemaFilePath);
 			writeDocumentToFile(schemaFilePath, xmlRoot.getDocument());
 		}
@@ -67,14 +76,14 @@ public class XMLService {
 	@SneakyThrows
 	private void createFileIfNotExists(String filePath) {
 		File file = new File(filePath);
-		if(!Files.exists(file.getAbsoluteFile().toPath()))
+		if(Files.exists(file.getAbsoluteFile().toPath())==false)
 			Files.createFile(file.getAbsoluteFile().toPath());
 	}
 
 	@SneakyThrows
 	private void createDirectoryIfNotExists(String dirPath) {
 		File file = new File(dirPath);
-		if(!Files.exists(file.getAbsoluteFile().toPath()))
+		if(Files.exists(file.getAbsoluteFile().toPath())==false)
 			Files.createDirectory(file.getAbsoluteFile().toPath());
 	}
 }

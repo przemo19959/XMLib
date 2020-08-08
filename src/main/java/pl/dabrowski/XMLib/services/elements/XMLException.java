@@ -1,4 +1,4 @@
-package services;
+package pl.dabrowski.XMLib.services.elements;
 
 import java.lang.annotation.Annotation;
 
